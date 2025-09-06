@@ -24,16 +24,14 @@ static inline void intercambiar(int *a, int *b) {
 /* Devuelve el promedio (double) de arr[bajo..alto] */
 double calcular_promedio_segmento(int arr[], int bajo, int alto) {
     double pro=0.0;
-    int i;
     for (int i = bajo; i <= alto; i++){
         pro +=arr[i];
     }
-    pro=pro/(alto-bajo+1);
     // Escribe aquí tu función
     // Pista:
     //   - Acumula en (long long) o (double) para evitar overflow
     //   - Devuelve suma / cantidad como double
-    return pro; // placeholder
+    return pro/(alto-bajo+1); // placeholder
 }
 
 /*
@@ -53,13 +51,16 @@ int particion_por_promedio(int arr[], int bajo, int alto, double pivote) {
     // Escribe aquí tu función
     // Puedes implementar un esquema tipo Hoare o Lomuto pero guiado por pivot double.
     // Recuerda: NO escribas 'pivote' dentro del arreglo; solo compáralo contra arr[i].
-    int i=bajo-1;
+    int i=bajo;
     for (int k = bajo; k <= alto; k++){
         if ((double)arr[k]<pivote){
-                i++;
             intercambiar(&arr[i], &arr[k]);
+            i++;
         }
+        
     }
+    if (i == bajo) i++;   
+    if (i > alto) i = alto; 
     // Escribe aquí tu función
     return i;
 }
@@ -73,12 +74,15 @@ int particion_por_promedio(int arr[], int bajo, int alto, double pivote) {
         3) Llamar recursivamente a los segmentos definidos por k
 */
 void quicksort_promedio(int arr[], int bajo, int alto) {
-    if(bajo<alto){
-        double pivote= calcular_promedio_segmento(arr, bajo,alto);
-        int mitad=particion_por_promedio(arr, bajo,alto, pivote);
-        quicksort_promedio(arr,bajo, mitad);
-        quicksort_promedio(arr, mitad+1,alto);
-    }
+    if (bajo >= alto) return;
+      double pivote= calcular_promedio_segmento(arr, bajo,alto);
+      int mitad=particion_por_promedio(arr, bajo,alto, pivote);
+      if (mitad-1>bajo){
+        quicksort_promedio(arr,bajo, mitad-1);
+      }
+      if (mitad<alto){
+          quicksort_promedio(arr, mitad,alto);
+      }
 }
 
 /* Utilidad para imprimir un arreglo */
@@ -112,11 +116,13 @@ int main(void) {
     }
 
     // Antes
-    // printf("Antes:  "); imprimir_arreglo(arr, n);
+    printf("Antes:  "); 
+    imprimir_arreglo(arr, n);
 
     quicksort_promedio(arr, 0, n - 1);
 
     // Después
+    printf("Despues:  "); 
     imprimir_arreglo(arr, n);
 
     free(arr);
