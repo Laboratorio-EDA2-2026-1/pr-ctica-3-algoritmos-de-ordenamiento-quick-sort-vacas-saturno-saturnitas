@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include <math.h>
 
 /*
   Ejercicio 3. El problema del papá tacaño.
@@ -96,7 +97,7 @@ int parsear_token(const char *tok, Destino *d) {
  *             esté más cercano a la media. En caso de empate, define
  *             una política simple, p. ej., el de menor índice.
  */
-int elegir_destino(const Destino *destinos, int n) {
+// int elegir_destino(const Destino *destinos, int n) {
     // Escribe aquí tu función
 
     // Sugerencias de variables que podrías usar:
@@ -118,7 +119,54 @@ int elegir_destino(const Destino *destinos, int n) {
     // 4) Hallar el índice con distancia mínima a la media
     //      - manejar empates de forma determinista (p. ej., menor índice)
 
-    return -1; // Placeholder: reemplaza por el índice elegido
+    // return -1; // Placeholder: reemplaza por el índice elegido
+// }
+
+int elegir_destino(const Destino *destinos, int n) {
+    int conocidos = 0, desconocidos = 0;
+    int max_conocido = -1;
+    double suma_conocidos = 0.0;
+
+    // 1) Contar conocidos/desconocidos y hallar max conocido
+    for (int i = 0; i < n; i++) {
+        if (destinos[i].es_conocido) {
+            conocidos++;
+            suma_conocidos += destinos[i].costo;
+            if (destinos[i].costo > max_conocido) max_conocido = destinos[i].costo;
+        } else {
+            desconocidos++;
+        }
+    }
+
+    // 2) Regla 5: mayoría desconocidos → elegir aleatorio
+    if (desconocidos > conocidos) {
+        int indices_des[n], k = 0;
+        for (int i = 0; i < n; i++) {
+            if (!destinos[i].es_conocido) indices_des[k++] = i;
+        }
+        int elegido = indices_des[rand() % k];
+        return elegido;
+    }
+
+    // 3) Calcular media de conocidos
+    double media = suma_conocidos / conocidos;
+
+    // 4) Representar desconocidos como (max_conocido + 1)
+    int valor_desconocido = max_conocido + 1;
+
+    // 5) Buscar índice más cercano a la media
+    int indice_elegido = -1;
+    double mejor_dist = 1e18; // grande
+    for (int i = 0; i < n; i++) {
+        int valor = destinos[i].es_conocido ? destinos[i].costo : valor_desconocido;
+        double dist = fabs(valor - media);
+        if (dist < mejor_dist) {
+            mejor_dist = dist;
+            indice_elegido = i;
+        }
+    }
+
+    return indice_elegido;
 }
 
 int main(void) {
